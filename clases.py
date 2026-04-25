@@ -1,3 +1,4 @@
+import pandas as pd
 import os
 
 def validar_entero(mensaje, minimo=None, maximo=None):
@@ -17,3 +18,20 @@ def validar_archivo(ruta, extensiones):
     if os.path.splitext(ruta)[1].lower() not in extensiones:
         raise ValueError("Extension no valida")
     return True
+
+class ArchivoSIATA:
+
+    def __init__(self, ruta_cvs):
+        validar_archivo(ruta_cvs, ['.csv'])
+        self.ruta_cvs = ruta_cvs
+        self.nombre = os.path.basename(ruta_cvs)
+        self.df = pd.read_csv(ruta_cvs)
+        self._configurar_indice_fecha()
+        
+    def _configurar_indice_fecha(self):
+        candidatos = [c for c in self.df.columns if any (p in c.lower() for p in ['fecha', 'date'])]
+        if candidatos:
+            self.df[candidatos[0]] = pd.to_datetime(self.df[candidatos[0]], errors='coerce')
+            self.df.set_index(candidatos[0], inplace=True)
+        else:
+            raise ValueError("No se encontró una columna de fecha válida en el archivo.")
