@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 import os
 
 def validar_entero(mensaje, minimo=None, maximo=None):
@@ -35,3 +36,13 @@ class ArchivoSIATA:
             self.df.set_index(candidatos[0], inplace=True)
         else:
             raise ValueError("No se encontró una columna de fecha válida en el archivo.")
+        
+    def graficar_columna(self, col, guardar=False):
+        fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+        serie = self.df[col].dropna()
+        axes[0].plot(serie)
+        axes[1].boxplot(serie)
+        axes[2].hist(serie, bins=20)
+        plt.tight_layout()
+        if guardar: plt.savefig(f"{col}_plot.png")
+        plt.show()
