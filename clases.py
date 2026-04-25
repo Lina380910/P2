@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy.io as sio
 import os
+
 
 def validar_entero(mensaje, minimo=None, maximo=None):
     while True:
@@ -63,3 +65,18 @@ class ArchivoSIATA:
         plt.plot(mensueal, label='Mensual', linewidth=3)
         plt.legend()
         plt.show()
+
+class ArchivoEEG:
+    def __init__(self, ruta_mat):
+        validar_archivo(ruta_mat, ['.mat'])
+        self.nombre = os.path.basename(ruta_mat)
+        self.data = sio.loadmat(ruta_mat)
+        self.matriz = None
+
+    def seleccionar_llave(self):
+        llaves = [l for l in self.data.keys() if not l.startswith('__') ]
+        for i, l in enumerate(llaves): print(f"{i}: {l}")
+        idx = validar_entero("Seleccione el indice de la matriz a analizar: ", 0, len(llaves)-1 )
+        self.matriz = self.data[llaves[idx]]
+
+    
