@@ -46,3 +46,20 @@ class ArchivoSIATA:
         plt.tight_layout()
         if guardar: plt.savefig(f"{col}_plot.png")
         plt.show()
+
+    def operaciones(self,col):
+        max_v = self.df[col].max()
+        self.df[f'{col}_norm'] = self.df[col].apply(lambda x: x / max_v if max_v !=0 else 0)
+        umbral = self.df[col].median()
+        self.df[f'{col}_bin'] = self.df[col].apply(lambda x: 'Alto' if x > umbral else 'Bajo')
+        print("operaciones aplicadas existosamente")
+
+    def graficar_remuestreo(self, col):
+        if not isinstance (self.df.index, pd.DatetimeIndex): return
+        diario = self.df[col].resample('D').mean()
+        mensueal = self.df[col].resample('ME').mean()
+        plt.figure(figsize=(10, 5))
+        plt.plot(diario, label='Diario')
+        plt.plot(mensueal, label='Mensual', linewidth=3)
+        plt.legend()
+        plt.show()
