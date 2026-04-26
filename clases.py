@@ -93,3 +93,15 @@ def estadisticas_3d (self,eje):
     plt.stem(promedio)
     plt.title(f"Promedio en eje {eje}")
     plt.show()
+
+class AlmacenObjetos:
+    def __init__(self):
+        self.objetos={}
+    def agregar (self,obj):
+        self.objetos [obj.nombre]=obj
+    def buscar (self,nombre):
+        return self._objetos.get (nombre)
+    def listar (self):
+        return list (self._objetos.keys())
+    
+
