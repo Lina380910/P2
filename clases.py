@@ -47,11 +47,11 @@ def validar_float (mensaje,minimo=None,maximo=None):
 
 class ArchivoSIATA:
 
-    def __init__(self, ruta_cvs):
-        validar_archivo(ruta_cvs, ['.csv'])
-        self.ruta_cvs = ruta_cvs
-        self.nombre = os.path.basename(ruta_cvs)
-        self.df = pd.read_csv(ruta_cvs)
+    def __init__(self, ruta_csv):
+        validar_archivo(ruta_csv, ['.csv'])
+        self.ruta_csv = ruta_csv
+        self.nombre = os.path.basename(ruta_csv)
+        self.df = pd.read_csv(ruta_csv)
         self._configurar_indice_fecha()
         print(f"\n '{self.nombre}' cargado exitosamente")
         print(f" Filas:{len(self.df)}| Columnas:{len(self.df.columns)}")
