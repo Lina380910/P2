@@ -282,13 +282,36 @@ def estadisticas_3d (self,eje):
 
 class AlmacenObjetos:
     def __init__(self):
-        self.objetos={}
+        self.objetos = {}
     def agregar (self,obj):
-        self.objetos [obj.nombre]=obj
+        clave = obj.nombre
+        self.objetos [clave]=obj
+        print(f"Objeto '{clave}' agregado al almacén.")
+
     def buscar (self,nombre):
-        return self._objetos.get (nombre)
+        if nombre  in self.objetos:
+            print(f"Objeto '{nombre}' encontrado en el almacén.")
+            return self.objetos[nombre]
+        print(f"Objeto '{nombre}' no encontrado en el almacén.")
+        return None
+    
     def listar (self):
-        return list (self._objetos.keys())
+        if not self.objetos:
+            print("El almacén está vacío.")
+            return
+        print("\n Objetos en el almacén:")
+        for i, (K, v) in enumerate(self.objetos.items()):
+            print(f" [{i}] {K:40s} ({tipo})")
+            tipo = type(v).__name__
+            print(f" [{i}] {K:40s} ({tipo})")
+    
+    def eliminar (self,nombre):
+        if nombre in self.objetos:
+            del self.objetos[nombre]
+            print(f"Objeto '{nombre}' eliminado del almacén.")
+        else:
+            print(f"Objeto '{nombre}' no encontrado en el almacén.")
+
     
 
 
