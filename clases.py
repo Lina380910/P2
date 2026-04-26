@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from pandas import col
 import scipy.io as sio
 import os
 
@@ -80,7 +81,7 @@ class ArchivoSIATA:
         for i, c in enumerate(cols): print(f"{i}: {c}")
         return cols
     
-    def elegir_columna(self, mensaje= "Ingrese el nombre de la")):  
+    def elegir_columna(self, mensaje= "Ingrese el nombre de la"):  
         self.mostrar_columnas()
         while True:
             col = input(mensaje).strip()
@@ -92,7 +93,7 @@ class ArchivoSIATA:
 
     def graficar_columna(self, nombre_col=None, guardar=False, carpeta="graficos"):
        if nombre_col is None:
-            nombre_col = self.elegir_columna()
+        nombre_col = self.elegir_columna()
         validar_columna(self.df, nombre_col)
         serie = self.df[nombre_col].dropna()
 
@@ -104,8 +105,16 @@ class ArchivoSIATA:
         axes[0].set_xlabel("Indice")
         axes[0].set_ylabel(nombre_col)
        
-        axes[1].boxplot(serie)
-        axes[2].hist(serie, bins=20)
+        axes[1].boxplot(serie,values, patch_artist=True, boxprops=dict(facecolor='lightcoral', color='darkred'), medianprops=dict(color='darkred'))
+        axes[1].set_title("Boxplot")
+        axes[1].set_xlabel(nombre_col)
+        axes[1].set_ylabel("Valor")
+        
+        axes[2].hist(serie, bins=30, color='mediumseagreen', edgecolor='black')
+        axes[2].set_title("Histograma")
+        axes[2].set_xlabel(nombre_col)
+        axes[2].set_ylabel("Frecuencia")
+        
         plt.tight_layout()
         if guardar: plt.savefig(f"{col}_plot.png")
         plt.show()
