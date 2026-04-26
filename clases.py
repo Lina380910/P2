@@ -24,6 +24,26 @@ def validar_archivo(ruta, extensiones):
         raise ValueError(f"Archivo no válido. Se esperaban extensiones: {', '.join(extensiones)}")
     return True
 
+def validar_columna (df,nombre_col):
+    if nombre_col not in df.columns:
+        raise KeyError(
+            f"Columna '{nombre_col}' no encontrada. \n"
+            f"Columnas disponibles: {list(df.columns)}"
+        )
+    return True
+
+def validar_float (mensaje,minimo=None,maximo=None):
+    while True:
+        try:
+            valor=float(input(mensaje))
+            if minimo is not None and valor < minimo:
+                print(f"El valor debe ser >={minimo}");continue
+            if maximo is not None and valor >maximo:
+                print (f"El valor debe ser <={maximo}");continue
+            return valor
+        except ValueError:
+            print("Ingrese un numero decimal valido")
+
 class ArchivoSIATA:
 
     def __init__(self, ruta_cvs):
@@ -108,16 +128,56 @@ class ArchivoSIATA:
         plt.show()
 
 class ArchivoEEG:
+
+    FS=1000
+
     def __init__(self, ruta_mat):
         validar_archivo(ruta_mat, ['.mat'])
         self.nombre = os.path.basename(ruta_mat)
         self.data = sio.loadmat(ruta_mat)
         self.matriz = None
 
-    def seleccionar_llave(self):
-        llaves = [l for l in self.data.keys() if not l.startswith('__') ]
-        for i, l in enumerate(llaves): print(f"{i}: {l}")
-        idx = validar_entero("Seleccione el indice de la matriz a analizar: ", 0, len(llaves)-1 )
-        self.matriz = self.data[llaves[idx]]
+    def mostrar_llaves(self):
+        print(f"\n Llaves en '{self.nombre}' (whosmat):")
+        info=sio.whosmat(self.ruta)
+        for nombre,forma,tipo in info:
+            print(f" .{nombre:20s}|forma:{str(forma):20s} |tipo:{tipo}")
+        return [i[0]for i in info]
 
+    def seleccionar_llave(self):
+        llaves = self.mostrar_llaves()
+        llaves_validas = [l for l in llaves if not l.startswith('__') ]
+        for i, l in enumerate(llaves_validas):
+            print(f"{i}: {l}")
+        idx=validar_entero("Seleccione el indice de la llave a cargar: ", 0, len(llaves_validas)-1)
+        self.llave=llaves_validas [idx]
+        self.matriz=self.data[self.llave]
+        print(f"llave '{self.llave}' cargada con forma {self.matriz.shape}")
+
+    def sumar_canales (self,c1,c2,p_min,p_max):
+        if self.matriz is None:return
+        segmento=self.matriz[c1,p_min:p_max]+self.matriz [c2,p_min:p_max]
+        plt.plot(segmento)
+        plt.title (f"Suma Canales{c1} y {c2}")
+        plt.show ()
+
+import numpy as np
+def estadisticas_3d (self,eje):
+    if self.matriz.ndim < 3:return
+    promedio=np.mean (self.matriz,axis=eje).flatten()
+    plt.stem(promedio)
+    plt.title(f"Promedio en eje {eje}")
+    plt.show()
+
+class AlmacenObjetos:
+    def __init__(self):
+        self.objetos={}
+    def agregar (self,obj):
+        self.objetos [obj.nombre]=obj
+    def buscar (self,nombre):
+        return self._objetos.get (nombre)
+    def listar (self):
+        return list (self._objetos.keys())
     
+
+
