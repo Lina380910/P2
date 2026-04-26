@@ -196,12 +196,57 @@ class ArchivoEEG:
         self.matriz=self.data[self.llave]
         print(f"llave '{self.llave}' cargada con forma {self.matriz.shape}")
 
-    def sumar_canales (self,c1,c2,p_min,p_max):
-        if self.matriz is None:return
-        segmento=self.matriz[c1,p_min:p_max]+self.matriz [c2,p_min:p_max]
-        plt.plot(segmento)
-        plt.title (f"Suma Canales{c1} y {c2}")
-        plt.show ()
+    def sumar_canales (self,guardar=False,carpeta="graficos"):
+        if self.matriz is None:
+            print("Primero seleccione una llave con 'seleccionar_llave()'.")
+            return
+        mat=self.matriz
+        if mat.ndim ==3:
+            mat=mat.reshape (mat.shape[0],-1)
+        elif mat.ndim ==1:
+            mat=mat.reshape (-1,1)
+        n_canales,n_muestras=mat.shape
+        print (f"\n Matriz convertida a 2D:{n_canales}canales x {n_muestras} muestras")
+
+        canales=[]
+        for i in range (1,4):
+            c=validar_entero (
+                f"Canal {i} (0 a {n_canales-1}):",0, n_canales-1)
+            canales.append(c)
+        
+        print(f"\n Rango disponible: 0 a {n_muestras-1} muestras")
+        p_min = validar_entero ("Punto minimo (muestra):",0, n_muestras-2)
+        p_max = validar_entero ("Punto maximo (muestra):",p_min+1, n_muestras-1)
+
+        t=np.arange (p_min,p_max)/self.FS
+
+        segmentos =[mat[c,p_min:p_max]for c in canales]
+        suma=segmentos[0]+segmentos[1]+segmentos[2]
+
+        fig, (ax1,ax2)=plt.subplots (2,1, figsize=(13,7), sharex=True)
+        fig.suptitle (f"Suma de canales {self.nombre}",fontsize=13, fontweight="bold")
+
+        colores=['blue','orange','green']
+        for seg,c,color in zip (segmentos,canales,colores):
+            ax1.plot (t,seg,label=f"Canal {c}",color=color)
+        ax1.set_title("Canales individuales")
+        ax1.set_ylabel("Amplitud")
+        ax1.legend()
+
+        ax2.plot (t,suma,label="Suma",color='crimson')
+        ax2.set_title("Suma de canales")
+        ax2.set_xlabel("Tiempo (s)")
+        ax2.set_ylabel("Amplitud")
+        ax2.legend()
+
+        plt.tight_layout()
+        if guardar:
+            os.makedirs(carpeta, exist_ok=True)
+            ruta=os.path.join(carpeta, f"suma_canales_{self.nombre}.png")
+            plt.savefig(ruta)
+            print(f"Grafico guardado en: {ruta}")
+        plt.show()
+
 
 import numpy as np
 def estadisticas_3d (self,eje):
