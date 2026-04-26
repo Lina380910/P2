@@ -157,16 +157,40 @@ class ArchivoSIATA:
         print("\nVista de las nuevas columnas:")
         nuevas = [c for c in self.df.columns if any( s in c for s in ['_norm', '_cat', '_+_', '_-_'])]
         print(self.df[nuevas].head())
-        
 
-    def graficar_remuestreo(self, col):
-        if not isinstance (self.df.index, pd.DatetimeIndex): return
-        diario = self.df[col].resample('D').mean()
-        mensueal = self.df[col].resample('ME').mean()
-        plt.figure(figsize=(10, 5))
-        plt.plot(diario, label='Diario')
-        plt.plot(mensueal, label='Mensual', linewidth=3)
-        plt.legend()
+
+    def graficar_remuestreo(self, nombre_col=None, guardar=False, carpeta="graficos"):
+        if not isinstance (self.df.index, pd.DatetimeIndex):
+            print("El índice del DataFrame no es de tipo fecha. No se puede realizar el remuestreo.")
+            return
+        if nombre_col is None:
+            nombre_col = self.elegir_columna()
+        validar_columna(self.df, nombre_col)
+        serie = self.df[nombre_col].dropna()
+
+        diario = serie.resample('D').mean()
+        mensual = serie.resample('ME').mean()
+        trimestre = serie.resample('QE').mean()
+        fig, axes = plt.subplots(3, 1, figsize=(14, 10))
+        fig.suptitle(f"Remuestreo de '{nombre_col}' - {self.nombre}", fontsize=13, fontweight='bold')
+        for ax, data, titulo, color in zip(
+            axes, 
+            [diario, mensual, trimestre], 
+            [ 'Diario', 'Mensual', 'Trimestral'],
+            ['steelblue', 'mediumseagreen', 'coral']
+        ):
+            ax.plot(datos.index, datos.values, marker='o', color=color, linewidth=1.2, markersize=3)
+            ax.set_title(f"Promedio {titulo}")
+            ax.set_xlabel("Fecha")
+            ax.set_ylabel(nombre_col)
+            ax.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        if guardar:
+            os.makedirs(carpeta, exist_ok=True)
+            ruta = os.path.join(carpeta, f"remuestreo_{nombre_col}.png")
+            plt.savefig(ruta, dpi=150)
+            print(f"Gráfico guardado en: {ruta}")
         plt.show()
 
 class ArchivoEEG:
