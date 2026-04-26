@@ -123,21 +123,74 @@ class ArchivoSIATA:
         print(f"Gráfico guardado en: {ruta}")
         plt.show()
 
-    def operaciones(self,col):
-        max_v = self.df[col].max()
-        self.df[f'{col}_norm'] = self.df[col].apply(lambda x: x / max_v if max_v !=0 else 0)
-        umbral = self.df[col].median()
-        self.df[f'{col}_bin'] = self.df[col].apply(lambda x: 'Alto' if x > umbral else 'Bajo')
-        print("operaciones aplicadas existosamente")
+    def operaciones(self):
+        cols = self.mostrar_columnas()
+        col_num = [c for c in cols if pd.api.types.is_numeric_dtype(self.df[c])]
+        if not col_num:
+            print("No se encontraron columnas numéricas para aplicar operaciones.")
+            return
+        print("\nColumnas numéricas disponibles:", col_num) 
+        col_apply = self.elegir_columna("Ingrese el nombre de la columna numérica para aplicar operaciones: ")
+        min_v = self.df[col_apply].min()
+        max_v = self.df[col_apply].max()
+        self.df[f'{col_apply}_norm'] = self.df[col_apply].apply(lambda x: (x - min_v) / (max_v - min_v) if (max_v - min_v) != 0 else 0)
+        print(f"apply: columna'{col_apply}' normalizada y guardada")
 
-    def graficar_remuestreo(self, col):
-        if not isinstance (self.df.index, pd.DatetimeIndex): return
-        diario = self.df[col].resample('D').mean()
-        mensueal = self.df[col].resample('ME').mean()
-        plt.figure(figsize=(10, 5))
-        plt.plot(diario, label='Diario')
-        plt.plot(mensueal, label='Mensual', linewidth=3)
-        plt.legend()
+        col_map = self.elegir_columna(" columna para mapear a categorías (ej: 'bajo', 'medio', 'alto'): ")
+        p33 = self.df[col_map].quantile(0.33)
+        p66 = self.df[col_map].quantile(0.66)
+        self.df[col_apply + '_cat'] = self.df[col_map].map( lambda x: 'alto' if x > p66 else ('medio' if x > p33 else 'bajo'))
+        print(f"map: columna '{col_map}' mapeada a categorías 'bajo', 'medio', 'alto' y guardada")
+
+        print("\nOperación entre dos columnas:")
+        print(" [1]Sumar\n [2]Restar")
+        op = validar_entero("Seleccione la operación a realizar (1/2): ", 1, 2)
+        col1 = self.elegir_columna("Primera columna: ")
+        col2 = self.elegir_columna("Segunda columna: ")
+        if op == 1:
+            self.df[f'{col1}_+_{col2}'] = self.df[col1] + self.df[col2]
+            print(f"Resultado de sumar '{col1}' y '{col2}' guardado en '{col1}_+_{col2}'.")
+        else:
+            self.df[f'{col1}_-_{col2}'] = self.df[col1] - self.df[col2]
+            print(f"Resultado de restar '{col1}' y '{col2}' guardado en '{col1}_-_{col2}'.")
+
+        print("\nVista de las nuevas columnas:")
+        nuevas = [c for c in self.df.columns if any( s in c for s in ['_norm', '_cat', '_+_', '_-_'])]
+        print(self.df[nuevas].head())
+
+
+    def graficar_remuestreo(self, nombre_col=None, guardar=False, carpeta="graficos"):
+        if not isinstance (self.df.index, pd.DatetimeIndex):
+            print("El índice del DataFrame no es de tipo fecha. No se puede realizar el remuestreo.")
+            return
+        if nombre_col is None:
+            nombre_col = self.elegir_columna()
+        validar_columna(self.df, nombre_col)
+        serie = self.df[nombre_col].dropna()
+
+        diario = serie.resample('D').mean()
+        mensual = serie.resample('ME').mean()
+        trimestre = serie.resample('QE').mean()
+        fig, axes = plt.subplots(3, 1, figsize=(14, 10))
+        fig.suptitle(f"Remuestreo de '{nombre_col}' - {self.nombre}", fontsize=13, fontweight='bold')
+        for ax, data, titulo, color in zip(
+            axes, 
+            [diario, mensual, trimestre], 
+            [ 'Diario', 'Mensual', 'Trimestral'],
+            ['steelblue', 'mediumseagreen', 'coral']
+        ):
+            ax.plot(datos.index, datos.values, marker='o', color=color, linewidth=1.2, markersize=3)
+            ax.set_title(f"Promedio {titulo}")
+            ax.set_xlabel("Fecha")
+            ax.set_ylabel(nombre_col)
+            ax.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        if guardar:
+            os.makedirs(carpeta, exist_ok=True)
+            ruta = os.path.join(carpeta, f"remuestreo_{nombre_col}.png")
+            plt.savefig(ruta, dpi=150)
+            print(f"Gráfico guardado en: {ruta}")
         plt.show()
 
 class ArchivoEEG:
