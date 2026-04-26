@@ -22,6 +22,14 @@ def validar_archivo(ruta, extensiones):
         raise ValueError("Extension no valida")
     return True
 
+def validar_columna (df,nombre_col):
+    if nombre_col not in df.columns:
+        raise KeyError(
+            f"Columna '{nombre_col}' no encontrada. \n"
+            f"Columnas disponibles: {list(df.columns)}"
+        )
+    return True
+
 def validar_float (mensaje,minimo=None,maximo=None):
     while True:
         try:
