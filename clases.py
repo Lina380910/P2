@@ -100,12 +100,12 @@ class ArchivoSIATA:
         fig, axes = plt.subplots(1, 3, figsize=(16, 4))
         fig.suptitle(f"Columna:'{nombre_col}' - {self.nombre}", fontsize=13, fontweight='bold')
        
-        axes[0].plot(serie, values, color = 'steelblue', linewidth=0.8)
+        axes[0].plot(serie.values, color = 'steelblue', linewidth=0.8)
         axes[0].set_title("Serie Temporal")
         axes[0].set_xlabel("Indice")
         axes[0].set_ylabel(nombre_col)
        
-        axes[1].boxplot(serie,values, patch_artist=True, boxprops=dict(facecolor='lightcoral', color='darkred'), medianprops=dict(color='darkred'))
+        axes[1].boxplot(serie.values, patch_artist=True, boxprops=dict(facecolor='lightcoral', color='darkred'), medianprops=dict(color='darkred'))
         axes[1].set_title("Boxplot")
         axes[1].set_xlabel(nombre_col)
         axes[1].set_ylabel("Valor")
@@ -173,7 +173,7 @@ class ArchivoSIATA:
         trimestre = serie.resample('QE').mean()
         fig, axes = plt.subplots(3, 1, figsize=(14, 10))
         fig.suptitle(f"Remuestreo de '{nombre_col}' - {self.nombre}", fontsize=13, fontweight='bold')
-        for ax, data, titulo, color in zip(
+        for ax, datos, titulo, color in zip(
             axes, 
             [diario, mensual, trimestre], 
             [ 'Diario', 'Mensual', 'Trimestral'],
