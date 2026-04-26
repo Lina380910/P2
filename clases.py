@@ -22,6 +22,18 @@ def validar_archivo(ruta, extensiones):
         raise ValueError("Extension no valida")
     return True
 
+def validar_float (mensaje,minimo=None,maximo=None):
+    while True:
+        try:
+            valor=float(input(mensaje))
+            if minimo is not None and valor < minimo:
+                print(f"El valor debe ser >={minimo}");continue
+            if maximo is not None and valor >maximo:
+                print (f"El valor debe ser <={maximo}");continue
+            return valor
+        except ValueError:
+            print("Ingrese un numero decimal valido")
+
 class ArchivoSIATA:
 
     def __init__(self, ruta_cvs):
@@ -104,4 +116,5 @@ class AlmacenObjetos:
     def listar (self):
         return list (self._objetos.keys())
     
+
 
