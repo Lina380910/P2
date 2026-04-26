@@ -87,11 +87,20 @@ class ArchivoSIATA:
         plt.show()
 
 class ArchivoEEG:
+
+    FS=1000
+
     def __init__(self, ruta_mat):
         validar_archivo(ruta_mat, ['.mat'])
         self.nombre = os.path.basename(ruta_mat)
         self.data = sio.loadmat(ruta_mat)
         self.matriz = None
+    def mostrar_llaves(self):
+        print(f"\n Llaves en '{self.nombre}' (whosmat):")
+        info=sio.whosmat(self.ruta)
+        for nombre,forma,tipo in info:
+            print(f" .{nombre:20s}|forma:{str(forma):20s} |tipo:{tipo}")
+        return [i[0]for i in info]
 
     def seleccionar_llave(self):
         llaves = [l for l in self.data.keys() if not l.startswith('__') ]
