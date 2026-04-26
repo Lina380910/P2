@@ -79,4 +79,13 @@ class ArchivoEEG:
         idx = validar_entero("Seleccione el indice de la matriz a analizar: ", 0, len(llaves)-1 )
         self.matriz = self.data[llaves[idx]]
 
+    def sumar_canales (self,c1,c2,p_min,p_max):
+        if self.matriz is None:return
+        segmento=self.matriz[c1,p_min:p_max]+self.matriz [c2,p_min:p_max]
+        plt.plot(segmento)
+        plt.title (f"Suma Canales{c1} y {c2}")
+        plt.show ()
+        
+
+
     
