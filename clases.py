@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from pandas import col
 import scipy.io as sio
 import os
 
@@ -14,12 +15,14 @@ def validar_entero(mensaje, minimo=None, maximo=None):
                 print(f"Por favor, ingrese un número menor o igual a {maximo}"); continue
             return valor
         except ValueError: print("Entrada no válida. Por favor, ingrese un número entero.")
+
     
 def validar_archivo(ruta, extensiones):
     if not os.path.isfile(ruta):
         raise FileNotFoundError(f"No se encontró el archivo: {ruta}")
-    if os.path.splitext(ruta)[1].lower() not in extensiones:
-        raise ValueError("Extension no valida")
+    ext = os.path.plitext(ruta)[1].lower()
+    if ext not in extensiones:
+        raise ValueError(f"Archivo no válido. Se esperaban extensiones: {', '.join(extensiones)}")
     return True
 
 def validar_columna (df,nombre_col):
@@ -50,23 +53,74 @@ class ArchivoSIATA:
         self.nombre = os.path.basename(ruta_cvs)
         self.df = pd.read_csv(ruta_cvs)
         self._configurar_indice_fecha()
+        print(f"\n '{self.nombre}' cargado exitosamente")
+        print(f" Filas:{len(self.df)}| Columnas:{len(self.df.columns)}")
         
     def _configurar_indice_fecha(self):
-        candidatos = [c for c in self.df.columns if any (p in c.lower() for p in ['fecha', 'date'])]
+        candidatos = [c for c in self.df.columns if any (p in c.lower() for p in ['fecha', 'date', 'time', 'hora'])]
         if candidatos:
-            self.df[candidatos[0]] = pd.to_datetime(self.df[candidatos[0]], errors='coerce')
-            self.df.set_index(candidatos[0], inplace=True)
+            col_fecha = candidatos[0]
+            self.df[col_fecha] = pd.to_datetime(self.df[col_fecha], errors='coerce')
+            self.df = self.df.set_index(col_fecha)
+            self.df.index.name = 'Fecha'
+            print(f" i Columna '{col_fecha}' configurada como índice de fecha.")
         else:
             raise ValueError("No se encontró una columna de fecha válida en el archivo.")
         
-    def graficar_columna(self, col, guardar=False):
-        fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-        serie = self.df[col].dropna()
-        axes[0].plot(serie)
-        axes[1].boxplot(serie)
-        axes[2].hist(serie, bins=20)
+    def mostrar_info(self):
+        print(f"\n{'='*55}")
+        print(f" INFO BASICA - {self.nombre}")
+        print(f"{'='*55}")
+        self.df.info()
+        print(f"\n{'='*55} ESTADISTICAS {'='*55}")
+        print(self.df.describe())
+
+    def mostrar_columnas(self):
+        cols = list(self.df.columns)
+        print("\nColumnas disponibles:")
+        for i, c in enumerate(cols): print(f"{i}: {c}")
+        return cols
+    
+    def elegir_columna(self, mensaje= "Ingrese el nombre de la"):  
+        self.mostrar_columnas()
+        while True:
+            col = input(mensaje).strip()
+            try:
+                validar_columna(self.df, col)
+                return col
+            except ValueError as e:
+                print(f"Error: {e}. Intente nuevamente.")
+
+    def graficar_columna(self, nombre_col=None, guardar=False, carpeta="graficos"):
+       if nombre_col is None:
+        nombre_col = self.elegir_columna()
+        validar_columna(self.df, nombre_col)
+        serie = self.df[nombre_col].dropna()
+
+        fig, axes = plt.subplots(1, 3, figsize=(16, 4))
+        fig.suptitle(f"Columna:'{nombre_col}' - {self.nombre}", fontsize=13, fontweight='bold')
+       
+        axes[0].plot(serie, values, color = 'steelblue', linewidth=0.8)
+        axes[0].set_title("Serie Temporal")
+        axes[0].set_xlabel("Indice")
+        axes[0].set_ylabel(nombre_col)
+       
+        axes[1].boxplot(serie,values, patch_artist=True, boxprops=dict(facecolor='lightcoral', color='darkred'), medianprops=dict(color='darkred'))
+        axes[1].set_title("Boxplot")
+        axes[1].set_xlabel(nombre_col)
+        axes[1].set_ylabel("Valor")
+        
+        axes[2].hist(serie, bins=30, color='mediumseagreen', edgecolor='black')
+        axes[2].set_title("Histograma")
+        axes[2].set_xlabel(nombre_col)
+        axes[2].set_ylabel("Frecuencia")
+
         plt.tight_layout()
         if guardar: plt.savefig(f"{col}_plot.png")
+        os.makedirs(carpeta, exist_ok=True)
+        ruta = os.path.join(carpeta, f"siata_{nombre_col}.png")
+        plt.savefig(ruta, dpi=150)
+        print(f"Gráfico guardado en: {ruta}")
         plt.show()
 
     def operaciones(self,col):
