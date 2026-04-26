@@ -1,5 +1,70 @@
 import os
-<<<<<<< HEAD
+from clases import (
+    ArchivoSIATA, ArchivoEEG, AlmacenObjetos, validar_entero
+)
+CARPETA_CONTROL = "control"
+CARPETA_PARKINSON = "parkinson"
+CARPETA_CVS = "csv"
+
+almacen = AlmacenObjetos()
+
+def separador(titulo=""):
+    ancho = 50
+    print("\n"+"-" * ancho)
+    if titulo:
+        print(f" {titulo}")
+        print("-" * ancho)
+
+def preguntar_guardar():
+        resp= input("¿Desea guardar los objetos en archivos CSV? (s/n): ").strip().lower()
+        return resp == 's'
+
+def listar_archivos(carpeta,extension):
+    if not os.path.exists(carpeta):
+        print(f"No se encontró la carpeta '{carpeta}'.")
+        return []
+    archivos = [f for f in os.listdir(carpeta) if f.lower().endswith(extension)]
+    archivos.sort()
+
+    if not archivos:
+        print(f"No se encontraron archivos con extensión '{extension}' en la carpeta '{carpeta}'.")
+        return []
+    print(f"Archivos encontrados en '{carpeta}':")
+    for i, nombre in enumerate(archivos):
+        print(f"{i}. {nombre}")
+    return[os.path.join(carpeta, f) for f in archivos]
+
+def seleccionar_archivo_csv():
+    separador("Seleccionar archivo SIATA")
+    rutas = listar_archivos(CARPETA_CVS,".csv")
+    if not rutas:
+         return None
+    idx = validar_entero("\n Ingrese el número del archivo SIATA a cargar: ", 0, len(rutas)-1)
+    return rutas[idx]
+
+def seleccionar_archivo_mat():
+     separador("Seleccionar archivo mat (EEG)")
+     print(" ")
+
+def menu_siata(siata:ArchivoSIATA):
+    while True:
+        print("\n Opciones de análisis SIATA:")
+        print("1. Mostrar información del archivo")
+        print("2. Mostrar datos estadísticos")
+        print("3. Graficar serie de tiempo")
+        print("0. Volver al menú principal")
+
+        op = validar_entero("\n Opcion:", 0, 3)
+        if op == 1:
+            siata.mostrar_info()
+        elif op == 2:
+            siata.mostrar_estadisticas()
+        elif op == 3:
+            guardar=preguntar_guardar()
+            siata.graficar_serie(guardar=guardar)
+        elif op == 0:
+            print("Saliendo del programa.")
+            break
 
 def menu_eeg(eeg:ArchivoEEG):
     eeg.mostrar_llaves()
@@ -97,51 +162,4 @@ def menu_principal():
 
 if __name__=="__main__":
     menu_principal()
-=======
-from clases import (
-    ArchivoSIATA, ArchivoEEG, AlmacenObjetos, validar_entero
-)
-CARPETA_CONTROL = "control"
-CARPETA_PARKINSON = "parkinson"
-CARPETA_CVS = "csv"
 
-almacen = AlmacenObjetos()
-
-def separador(titulo=""):
-    ancho = 50
-    print("\n"+"-" * ancho)
-    if titulo:
-        print(f" {titulo}")
-        print("-" * ancho)
-
-def preguntar_guardar():
-        resp= input("¿Desea guardar los objetos en archivos CSV? (s/n): ").strip().lower()
-        return resp == 's'
-
-def listar_archivos(carpeta,extension):
-    if not os.path.exists(carpeta):
-        print(f"No se encontró la carpeta '{carpeta}'.")
-        return []
-    archivos = [f for f in os.listdir(carpeta) if f.lower().endswith(extension)]
-    archivos.sort()
-
-    if not archivos:
-        print(f"No se encontraron archivos con extensión '{extension}' en la carpeta '{carpeta}'.")
-        return []
-    print(f"Archivos encontrados en '{carpeta}':")
-    for i, nombre in enumerate(archivos):
-        print(f"{i}. {nombre}")
-    return[os.path.join(carpeta, f) for f in archivos]
-
-def seleccionar_archivo_cvs():
-    separador("Seleccionar archivo SIATA")
-    rutas = listar_archivos(CARPETA_CVS,".csv")
-    if not rutas:
-         return None
-    idx = validar_entero("\n Ingrese el número del archivo SIATA a cargar: ", 0, len(rutas)-1)
-    return rutas[idx]
-
-def seleccionar_archivo_mat():
-     separador("Seleccionar archivo mat (EEG)")
-     print(" ")
->>>>>>> 6e9a2aa3a4cade24d4220db08cf6520ec5322228
