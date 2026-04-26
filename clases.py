@@ -85,7 +85,11 @@ class ArchivoEEG:
         plt.plot(segmento)
         plt.title (f"Suma Canales{c1} y {c2}")
         plt.show ()
-        
 
-
-    
+import numpy as np
+def estadisticas_3d (self,eje):
+    if self.matriz.ndim < 3:return
+    promedio=np.mean (self.matriz,axis=eje).flatten()
+    plt.stem(promedio)
+    plt.title(f"Promedio en eje {eje}")
+    plt.show()
