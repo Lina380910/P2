@@ -4,7 +4,7 @@ from clases import (
 )
 CARPETA_CONTROL = "control"
 CARPETA_PARKINSON = "parkinson"
-CARPETA_CVS = "csv"
+CARPETA_CSV = "csv"
 
 almacen = AlmacenObjetos()
 
@@ -36,7 +36,7 @@ def listar_archivos(carpeta,extension):
 
 def seleccionar_archivo_csv():
     separador("Seleccionar archivo SIATA")
-    rutas = listar_archivos(CARPETA_CVS,".csv")
+    rutas = listar_archivos(CARPETA_CSV,".csv")
     if not rutas:
          return None
     idx = validar_entero("\n Ingrese el número del archivo SIATA a cargar: ", 0, len(rutas)-1)
