@@ -95,6 +95,7 @@ class ArchivoEEG:
         self.nombre = os.path.basename(ruta_mat)
         self.data = sio.loadmat(ruta_mat)
         self.matriz = None
+
     def mostrar_llaves(self):
         print(f"\n Llaves en '{self.nombre}' (whosmat):")
         info=sio.whosmat(self.ruta)
@@ -103,10 +104,14 @@ class ArchivoEEG:
         return [i[0]for i in info]
 
     def seleccionar_llave(self):
-        llaves = [l for l in self.data.keys() if not l.startswith('__') ]
-        for i, l in enumerate(llaves): print(f"{i}: {l}")
-        idx = validar_entero("Seleccione el indice de la matriz a analizar: ", 0, len(llaves)-1 )
-        self.matriz = self.data[llaves[idx]]
+        llaves = self.mostrar_llaves()
+        llaves_validas = [l for l in llaves if not l.startswith('__') ]
+        for i, l in enumerate(llaves_validas):
+            print(f"{i}: {l}")
+        idx=validar_entero("Seleccione el indice de la llave a cargar: ", 0, len(llaves_validas)-1)
+        self.llave=llaves_validas [idx]
+        self.matriz=self.data[self.llave]
+        print(f"llave '{self.llave}' cargada con forma {self.matriz.shape}")
 
     def sumar_canales (self,c1,c2,p_min,p_max):
         if self.matriz is None:return
