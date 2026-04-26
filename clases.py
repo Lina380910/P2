@@ -114,9 +114,13 @@ class ArchivoSIATA:
         axes[2].set_title("Histograma")
         axes[2].set_xlabel(nombre_col)
         axes[2].set_ylabel("Frecuencia")
-        
+
         plt.tight_layout()
         if guardar: plt.savefig(f"{col}_plot.png")
+        os.makedirs(carpeta, exist_ok=True)
+        ruta = os.path.join(carpeta, f"siata_{nombre_col}.png")
+        plt.savefig(ruta, dpi=150)
+        print(f"Gráfico guardado en: {ruta}")
         plt.show()
 
     def operaciones(self,col):
