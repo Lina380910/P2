@@ -220,12 +220,51 @@ class ArchivoEEG:
 
 
 import numpy as np
-def estadisticas_3d (self,eje):
-    if self.matriz.ndim < 3:return
-    promedio=np.mean (self.matriz,axis=eje).flatten()
-    plt.stem(promedio)
-    plt.title(f"Promedio en eje {eje}")
+def estadisticas_3d (self,guardar=False,carpeta="graficos"):
+    if self.matriz is None:
+        print("Primero seleccione una llave con 'seleccionar_llave()'.")
+        return
+    mat=self.matriz
+    if mat.ndim < 3:
+        print("La matriz no tiene 3 dimensiones. No se pueden calcular estadísticas 3D.")
+        return
+    
+    print(f"\n Matriz original con forma {mat.shape}")
+    print (f"Ejes disponibles:0,1,2")
+    eje=validar_entero("Seleccione el eje para calcular estadísticas (0, 1 o 2):", 0, 2)
+
+    promedio=np.mean (mat, axis=eje)
+    std=np.std (mat, axis=eje)
+    
+    prom_flat=promedio.flatten()
+    std_flat=std.flatten()
+    x=np.arange(len(prom_flat))
+    
+    fig, (ax1, ax2)=plt.subplots(1,2, figsize=(14,5))
+    fig.suptitle(f"Estadísticas en eje {eje} - {self.nombre}", fontsize=13, fontweight="bold")
+
+    markerline, stemlines,baseline=ax1.stem(
+        x, prom_flat, linefmt='blue', markerfmt='o', basefmt=' ')
+    markerline.set_markersize (3)
+    ax1.set_title("Promedio")
+    ax1.set_xlabel("Índice")
+    ax1.set_ylabel("Amplitud")
+
+    markerline, stemlines,baseline=ax2.stem(
+        x, std_flat, linefmt='orange', markerfmt='o', basefmt=' ')
+    markerline.set_markersize (3)
+    ax2.set_title("Desviación Estándar")
+    ax2.set_xlabel("Índice")
+    ax2.set_ylabel("Amplitud")
+    plt.tight_layout()
+
+    if guardar:
+        os.makedirs(carpeta, exist_ok=True)
+        ruta=os.path.join(carpeta, f"estadisticas_3d_{self.nombre}.png")
+        plt.savefig(ruta)
+        print(f"Gráfico guardado en: {ruta}")
     plt.show()
+    
 
 class AlmacenObjetos:
     def __init__(self):
